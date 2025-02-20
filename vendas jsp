@@ -1,0 +1,74 @@
+<%-- 
+    Document   : form
+    Created on : 12/08/2019, 10:15:28
+    Author     : joao
+--%>
+
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+    <head>
+        
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <title></title>
+    </head>
+    <body>
+        
+            <h1>Formulario de Vendas JSP</h1>
+        <div class="col-md-4 mb-3">
+            <hr>
+        </div>
+		<div class="col-md-4 mb-3" >
+        <form method="post" action="vd.do" >
+            <br>
+             <input class="form-control" type="text" name="v1" maxlength="5" placeholder="Digite o Valor 1" />
+            <br>
+            <div class="radio">
+            <label><input type="radio" name="operacao" value="1" checked>A vista</label>
+            <label><input type="radio" name="operacao" value="2"> 2x</label>
+            <label><input type="radio" name="operacao" value="3"> 3x</label>
+            <label><input type="radio" name="operacao" value="4"> 4x</label>
+          </div>
+            <button class="btn btn-primary" type="submit" value="Enviar">Enviar</button> 
+            <button class="btn btn-primary" type="reset" value="Limpar">Limpar</button>
+        </div>
+        </form>
+       </body>
+</html>
+=============================================Servlet======================
+ protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        try (PrintWriter out = response.getWriter()) {
+            double valor = Double.valueOf(request.getParameter("v1"));
+            double op =    Double.valueOf(request.getParameter("operacao"));
+            double total = 0;
+            String tipo = "";
+            if(op == 1){ total = valor - (valor*0.05);}
+            if(op == 2){total = valor + (valor*0.05);}
+            if(op == 3){total = valor + (valor*0.07);}
+            if(op == 4){ total = valor + (valor*0.1);}
+    
+            request.setAttribute("TOTAL", total);
+            RequestDispatcher rd = request.getRequestDispatcher("resposta.jsp");
+            rd.forward(request,response);
+        }
+    }
+	=====================================================resposta========================
+	<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>JSP Page</title>
+    </head>
+    <body>
+     <%
+           String resultado = (String) request.getAttribute("TOTAL").toString();
+           %>
+           <h3><%=resultado%></h3>
+           <p><a href="form.jsp">Voltar</a></p>
+    </body>
+</html>

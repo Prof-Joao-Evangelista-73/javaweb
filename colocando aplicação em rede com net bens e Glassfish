@@ -1,0 +1,14 @@
+No NetBeans quando se manda “Construir” ou “Limpar e Construir” dentre os vários diretórios e arquivos que ele cria, um é a pasta dist, no caso de uma aplicação JavaWeb, dentro da pasta dist é criado um arquivo com extensão .war, esse é o arquivo que deve ser implantado (deployed) no servidor GlassFish.
+
+
+Uma vez que já tenha o servidor GlassFish V3 instalado e iniciado, basta abrir o seu browser de internet e acessar a url http://localhost:4848 36 e irá acessar a tela de configuração e gerencia do servidor (a porta 4848 é a padrão do glassfish, mas no processo de instalção pode ser alterada)
+
+Na página inicial selecione a opção Implantar um aplicativo
+
+
+Na tela seguinte você terá as seguintes opções:
+
+
+1- nessa caixa você irá abrir o arquivo .war que foi citado.
+2- Você escolhe o tipo WebAplication
+3- Esse campo indica o caminho que você irá utilizar para acessar sua aplicação. Ex: http://localhost:8080/minhaaplicacao

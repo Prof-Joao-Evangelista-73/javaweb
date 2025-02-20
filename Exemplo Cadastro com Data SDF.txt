@@ -1,0 +1,245 @@
+### Cliente.java ######################################################
+
+package br.com.controle;
+
+import java.util.Calendar;
+
+/**
+ *
+ * @author - 201721118
+ */
+public class Cliente {
+    private int codigo;
+    private String nome;
+    private String email;
+    private Calendar dataCadastro;
+
+    public int getCodigo() {
+        return codigo;
+    }
+
+    public void setCodigo(int codigo) {
+        this.codigo = codigo;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public Calendar getDataCadastro() {
+        return dataCadastro;
+    }
+
+    public void setDataCadastro(Calendar dataCadastro) {
+        this.dataCadastro = dataCadastro;
+    }
+}
+
+
+### ClienteDAO.java ######################################################
+
+package br.com.DAO;
+
+import br.com.controle.Cliente;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Calendar;
+
+/**
+ *
+ * @author Leonardo Almeida - 201721118
+ */
+public class ClienteDAO extends DAO{
+    
+    public void inserir(Cliente c) throws Exception {
+        try{
+            abrirBanco();
+            String query = "INSERT INTO cliente (CODIGO, NOME, EMAIL ,DATA_CADASTRO) "
+                         + "VALUES (null, ?, ?, ?)";
+            
+            pst = (PreparedStatement) con.prepareStatement(query);
+            pst.setString(1, c.getNome());
+            pst.setString(2, c.getEmail());
+            pst.setDate(3, new java.sql.Date(c.getDataCadastro().getTimeInMillis() ));
+
+            pst.execute();
+            
+            fecharBanco();
+            
+        }catch(Exception e){
+            System.out.println("Erro: "+ e.getMessage());
+        }
+    }
+    
+    public ArrayList<Cliente> pesquisarTudo () throws Exception {
+       ArrayList<Cliente> listaClientes = new ArrayList<Cliente>();
+         try{
+         abrirBanco();  
+         String query = "select * FROM cliente order by(codigo)desc limit 0,5";
+         pst = con.prepareStatement(query);
+         ResultSet rs = pst.executeQuery();
+         Cliente cTemp ;
+         while (rs.next()){ 
+           cTemp = new Cliente();
+           cTemp.setCodigo(rs.getInt("codigo"));
+           cTemp.setNome(rs.getString("nome"));
+           cTemp.setEmail(rs.getString("email"));
+           
+        //Pegando data com Calendar
+           Calendar cal = Calendar.getInstance();
+           cal.setTime(rs.getDate("data_cadastro"));
+           
+           cTemp.setDataCadastro( cal );
+           
+           listaClientes.add(cTemp); 
+         } 
+         fecharBanco();
+       }catch (Exception e){
+           System.out.println("Erro " + e.getMessage());
+     } 
+       return listaClientes;
+     }
+
+    public void deletar(Cliente c) throws Exception{
+         abrirBanco();
+         String query = "delete FROM cliente where codigo = ? ";
+         pst=(PreparedStatement) con.prepareStatement(query);
+         pst.setInt(1, c.getCodigo());
+         pst.execute();
+        fecharBanco();   
+    }
+    
+    public void alterar(Cliente c) throws Exception {
+        try {
+            abrirBanco();
+            String query = "UPDATE cliente SET nome = ?, email = ? WHERE codigo= ? ";
+            pst = con.prepareStatement(query);
+            pst.setString(1, c.getNome());
+            pst.setString(2, c.getEmail());
+            pst.setInt(3, c.getCodigo());
+            pst.execute();
+            fecharBanco();
+        } catch (Exception e) {
+            System.out.println("Erro " + e.getMessage());
+        }
+    }
+
+    public Cliente pesquisar(int id) throws Exception {
+        try {
+            Cliente c = new Cliente();
+            System.out.println("Chegou no pesquisar registo " + id);
+            abrirBanco();
+            String query = "select * FROM cliente where codigo = ?";
+            pst = con.prepareStatement(query);
+            pst.setInt(1, id);
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                c.setCodigo(rs.getInt("codigo"));
+                c.setNome(rs.getString("nome"));
+                c.setEmail(rs.getString("email"));
+        
+        //Pegando data com Calendar
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(rs.getDate("data_cadastro"));
+                c.setDataCadastro( cal );
+                return c;
+            }
+            fecharBanco();
+            } catch (Exception e) {
+             System.out.println("Erro " + e.getMessage());
+            }
+        return null;
+    }       
+    
+}
+
+
+
+### lista.jsp #######################################################################
+
+<%@page import="java.text.SimpleDateFormat"%>
+<%@page import="java.util.ArrayList"%>
+<%@page import="br.com.controle.Cliente"%>
+<%@page import="br.com.DAO.ClienteDAO"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>JSP Page</title>
+    </head>
+    <body>
+        <%@include file="navbar.jsp"%>
+    
+        <div style="margin:10px;">
+            <h1>Clientes cadastrados</h1>
+            
+            <table border="1">
+                <tr>
+                    <th>Código</th>
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th>Data de cadastro</th>
+                </tr>
+
+<%
+            String tCodigo = "";
+            String tNome = "";
+            String tEmail = "";
+            String tDataCadastro = "";
+
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+            
+            ClienteDAO nDAO = new ClienteDAO();
+            Cliente c = new Cliente();
+            ArrayList<Cliente> listaC = nDAO.pesquisarTudo();
+            
+            for (int i = 0; i < listaC.size(); i++){
+                c = listaC.get(i);
+                tCodigo = String.valueOf(c.getCodigo());
+                tNome   = String.valueOf(c.getNome());
+                tEmail  = String.valueOf(c.getEmail());
+                tDataCadastro = String.valueOf(sdf.format(c.getDataCadastro().getTime()));
+                
+        %>
+
+        <tr>
+            <td><%= tCodigo%> </td>
+            <td><%= tNome%> </td>
+            <td><%= tEmail%> </td>
+            <td><%= tDataCadastro%> </td>
+            <td>
+                <a href="alter?codigo=<%=tCodigo%>" >Alterar</a>
+            </td>
+            <td>
+                <a href="del?codigo=<%=tCodigo%>" onclick="return confirm('Confirma exclusão do registro <%=tNome%>?')">excluir </a>   
+            </td>
+            
+        </tr>
+        
+<%
+            }
+%>
+                
+
+                
+            </table>
+        
+        
+        </div>
+    </body>
+</html>
+
